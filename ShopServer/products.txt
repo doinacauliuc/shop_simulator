@@ -1,0 +1,30 @@
+Telefono:101:299.99
+Tablet:102:199.99
+Computer portatile:103:899.99
+Monitor:104:149.99
+Tastiera:105:29.99
+Mouse:106:19.99
+Cuffie:107:49.99
+Stampante:108:89.99
+Scanner:109:109.99
+Caricabatterie:110:15.99
+Webcam:111:39.99
+Hard disk esterno:112:79.99
+Chiavetta USB:113:12.99
+Router Wi-Fi:114:59.99
+Smartwatch:115:199.99
+Smart TV:116:599.99
+Console da gioco:117:499.99
+Frigorifero:118:899.99
+Lavatrice:119:699.99
+Forno a microonde:120:129.99
+Macchina per il caffè:121:99.99
+Climatizzatore:122:349.99
+Aspirapolvere robot:123:249.99
+Altoparlanti Bluetooth:124:59.99
+Telecomando universale:125:19.99
+Lampadina smart:126:14.99
+Bilancia digitale:127:24.99
+Termostato intelligente:128:129.99
+Proiettore:129:349.99
+Sistema di allarme:130:199.99

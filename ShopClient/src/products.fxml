@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TableView fx:id="productsTable" layoutX="115.0" layoutY="70.0" prefHeight="277.0" prefWidth="371.0">
+        <columns>
+          <TableColumn fx:id="Name" prefWidth="138.0" text="Product" />
+          <TableColumn fx:id="ID" prefWidth="119.0" text="ID" />
+            <TableColumn fx:id="Price" prefWidth="113.0" text="Price" />
+        </columns>
+      </TableView>
+      <Text fill="#2e3680" layoutX="147.0" layoutY="56.0" strokeType="OUTSIDE" strokeWidth="0.0" text="OWNED PRODUCTS">
+         <font>
+            <Font name="MuktaMahee ExtraBold" size="36.0" />
+         </font>
+      </Text>
+      <Text layoutX="204.0" layoutY="367.0" strokeType="OUTSIDE" strokeWidth="0.0" text="These are the products you can return." />
+      <Button fx:id="Main" layoutX="30.0" layoutY="15.0" mnemonicParsing="false" text=" &lt;- Main Menu" textFill="#2e3680">
+         <font>
+            <Font size="11.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>

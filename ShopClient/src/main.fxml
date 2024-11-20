@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TableView fx:id="productsTable" layoutX="46.0" layoutY="52.0" prefHeight="450.0" prefWidth="405.0">
+        <columns>
+          <TableColumn fx:id="Name" prefWidth="162.5" text="Product Name" />
+          <TableColumn fx:id="ID" prefWidth="129.0" text="Product ID" />
+            <TableColumn fx:id="Price" prefWidth="112.5" text="Price" />
+        </columns>
+      </TableView>
+      <Text fill="#2e3680" layoutX="125.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="AVAILABLE PRODUCTS">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Text>
+      <TextField fx:id="ProductName" layoutX="521.0" layoutY="172.0" prefHeight="26.0" prefWidth="209.0" promptText="Product Name" />
+      <TextField fx:id="ProductID" layoutX="521.0" layoutY="209.0" prefHeight="28.0" prefWidth="209.0" promptText="Product ID" />
+      <Button fx:id="BuyButton" layoutX="523.0" layoutY="304.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="209.0" text="Buy" textFill="#2e3680" />
+      <Button fx:id="ReturnButton" layoutX="523.0" layoutY="341.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="209.0" text="Return" textFill="#2e3680" />
+      <Button fx:id="AddButton" layoutX="523.0" layoutY="376.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="209.0" text="Add" textFill="#2e3680" />
+      <Button fx:id="LogOutButton" layoutX="695.0" layoutY="24.0" mnemonicParsing="false" text="Log out" textFill="#2e3680" />
+      <TextField fx:id="ProductPrice" layoutX="522.0" layoutY="248.0" prefHeight="28.0" prefWidth="209.0" promptText="Price" />
+      <Text fill="#2e3680" layoutX="508.0" layoutY="154.0" strokeType="OUTSIDE" strokeWidth="0.0" text="You can buy, return or offer a new product !" />
+      <Text fx:id="Warning" fill="#dd1515" layoutX="523.0" layoutY="423.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="209.0">
+         <font>
+            <Font size="11.0" />
+         </font>
+      </Text>
+      <Text fx:id="Success" fill="#20720b" layoutX="520.0" layoutY="122.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="209.0">
+         <font>
+            <Font size="11.0" />
+         </font></Text>
+      <Button fx:id="Purchases" layoutX="673.0" layoutY="476.0" mnemonicParsing="false" text="Your purchases" textFill="#2e3680" />
+   </children>
+</AnchorPane>
