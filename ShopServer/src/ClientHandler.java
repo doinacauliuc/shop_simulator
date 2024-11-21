@@ -81,9 +81,10 @@ public class ClientHandler implements Runnable {
                     System.out.println("Recieved new product offer: " + offeredProduct.getProductID());
                     //checks if product already is contained
                     for(Product item : ShopServer.productList){
-                        if(productID.equals(item.getProductID()) || productName.equalsIgnoreCase(item.getProductName()) || productPrice.equals(item.getProductPrice())){
+                        if(productID.equals(item.getProductID()) || productName.equalsIgnoreCase(item.getProductName())){
                             out.writeObject("OFFER REJECTED");
                             invalidValue = true;
+                            System.out.println("OFFER REJECTED");
                         }
                     }
 
@@ -91,6 +92,7 @@ public class ClientHandler implements Runnable {
                     if(!invalidValue){
                         out.writeObject("OFFER ACCEPTED");
                         ShopServer.productList.add(offeredProduct);
+
                     }
 
                 }
@@ -100,7 +102,8 @@ public class ClientHandler implements Runnable {
                     ShopServer.productList.add(returnedProduct);
                 }
             } catch (IOException e) {
-                System.out.println("Access denied");
+                closeConnection();
+
                 try {
                     client.close();
                     running = false;
@@ -113,6 +116,18 @@ public class ClientHandler implements Runnable {
 
         }
 
+    }
+
+    private void closeConnection() {
+        try{
+            in.close();
+            out.close();
+            client.close();
+            System.out.println("Connection to: " + client.getInetAddress().getHostAddress() + " closed");
+        }
+        catch(IOException e){
+            System.out.println("Unable to close connection");
+        }
     }
 
 }

@@ -1,3 +1,4 @@
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -28,14 +29,15 @@ public class MainController {
     private Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
-    private List<Scene> scenes;
 
     private final ObservableList<ProductRow> productRows = FXCollections.observableArrayList();
     public static List<Product> products = new ArrayList<>();
+    public static ObservableList<ProductRow> OwnedRows = FXCollections.observableArrayList();
+    public static List<Product> ownedProducts = new ArrayList<>();
 
 
 
-
+    //Shop products table
     @FXML
     private TableView<ProductRow> productsTable;
 
@@ -48,6 +50,19 @@ public class MainController {
     @FXML
     private TableColumn<Product, String> Price;
 
+    //Owned products table
+    @FXML
+    private TableView<ProductRow> OwnedTable;
+
+    @FXML
+    private TableColumn<Product, String> OwnedName;
+
+    @FXML
+    private TableColumn<Product, String> OwnedID;
+
+    @FXML
+    private TableColumn<Product, String> OwnedPrice;
+
     @FXML
     private Button LogOutButton;
     @FXML
@@ -56,8 +71,6 @@ public class MainController {
     private Button ReturnButton;
     @FXML
     private Button AddButton;
-    @FXML
-    private Button Purchases;
     @FXML
     private TextField ProductName;
     @FXML
@@ -74,11 +87,10 @@ public class MainController {
 
 
 
-    MainController(Socket socket, ObjectOutputStream out, ObjectInputStream in, List<Scene> scenes) throws IOException {
+    MainController(Socket socket, ObjectOutputStream out, ObjectInputStream in) throws IOException {
         this.socket = socket;
         this.out = out;
         this.in = in;
-        this.scenes = scenes;
     }
 
     @FXML
@@ -104,10 +116,19 @@ public class MainController {
             System.out.println("Class not found: " + e.getMessage());
         }
 
+        //set up Owned products table
+        OwnedName.setCellValueFactory(new PropertyValueFactory<>("Name"));
+        OwnedID.setCellValueFactory(new PropertyValueFactory<>("ID"));
+        OwnedPrice.setCellValueFactory(new PropertyValueFactory<>("Price"));
+        OwnedTable.setItems(OwnedRows);
+
+
         LogOutButton.setOnAction(event -> {
             try {
                 LogOut(event);
             } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -132,25 +153,35 @@ public class MainController {
                 throw new RuntimeException(e);
             }
         });
-        Purchases.setOnAction(event -> {
-            try {
-                OwnerPage(event);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
     }
 
 
-    public void LogOut(ActionEvent event) throws IOException {
-        Parent root = null;
-        root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("login.fxml")));
-        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        scene = new Scene(root);
-        scenes.add(scene);
-        stage.setScene(scene);
-        stage.show();
+    public void LogOut(ActionEvent event) throws IOException, ClassNotFoundException {
+        try {
+            // Close resources
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+            if (in != null) {
+                in.close();
+            }
+
+            // Load the login screen
+            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("Login.fxml")));
+            Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            currentStage.setScene(new Scene(root));
+            currentStage.show();
+
+            System.out.println("Logged out and returned to login screen.");
+
+
+        } catch (IOException e) {
+            System.out.println("Error while logging out: " + e.getMessage());
+        }
+
     }
 
     public void ReturnProduct(ActionEvent event) throws IOException {
@@ -158,22 +189,33 @@ public class MainController {
         String productID = ProductID.getText();
         String productPrice = ProductPrice.getText();
         boolean returnable = false;
+        Product returned = null;
+        ProductRow returnedRow = null;
 
-        for(Product product : ProductsController.ownedProducts) {
+        for(Product product : ownedProducts) {
             if(product.getProductID().equals(productID) && product.getProductName().equalsIgnoreCase(productName) && product.getProductPrice().equals(productPrice)) {
                 returnable = true;
+                returned = product;
             }
         }
         if(returnable) {
-            //new product
-            Product returned = new Product(productName, productID, productPrice);
+            //finds which row to move
+            for(ProductRow row : OwnedRows) {
+                if(row.getName().equalsIgnoreCase(productName) && row.getID().equals(productID) && row.getPrice().equals(productPrice)) {
+                    returnedRow = row;
+                }
+            }
             //sends product to server
             out.writeObject("RETURN REQUEST");
             out.writeObject(returned);
-            //writes it on tableview
-            ProductRow productRow = new ProductRow(productName, productID, productPrice);
-            productRows.add(productRow);
-            ProductsController.ownedProducts.remove(returned);
+            //writes it on tableview and adds to product list
+            productRows.add(returnedRow);
+            products.add(returned);
+            //removes from owned products table and list
+            ownedProducts.remove(returned);
+            OwnedRows.remove(returnedRow);
+
+            //UI messages
             Warning.setText("");
             Success.setText("Succesfully returned: " + productName);
         }
@@ -185,37 +227,58 @@ public class MainController {
         String productID = ProductID.getText();
         String productPrice = ProductPrice.getText();
         String message;
+        Boolean addable = true;
         Product offeredProduct = new Product(productName, productID, productPrice);
 
-        try{
-            float numericPrice = Float.parseFloat(productPrice);
-
-
-            //sends offer message to server
-            out.writeObject("OFFER");
-            //sends new product to server
-            out.writeObject(offeredProduct);
-
-            //checks server response
-            try {
-                message = (String) in.readObject();
-                if (message.equals("OFFER ACCEPTED")) {
-                    //adds product to product list and to table view
-                    products.add(offeredProduct);
-                    ProductRow newRow = new ProductRow(productName, productID, productPrice);
-                    productRows.add(newRow);
-                }
-                else if (message.equals("OFFER REJECTED")) {
-                    Warning.setText("Product or product ID already exists");
-
-                }
-            }
-            catch (ClassNotFoundException e) {
-                System.out.println("Class not found: " + e.getMessage());
+        //if any other product has the same name or ID, new product cannot be added
+        for(Product product : ownedProducts) {
+            if(product.getProductName().equalsIgnoreCase(productName) || product.getProductID().equals(productID)) {
+                addable = false;
             }
         }
-        catch (NumberFormatException e){
-            Warning.setText("Invalid product price: must be a float (00.00)");
+
+        if(addable) {
+            try{
+                float numericPrice = Float.parseFloat(productPrice);
+
+
+                //sends offer message to server
+                out.writeObject("OFFER");
+                //sends new product to server
+                out.writeObject(offeredProduct);
+
+                //checks server response
+                try {
+                    message = (String) in.readObject();
+                    if (message.equals("OFFER ACCEPTED")) {
+                        //adds product to product list and to table view
+                        products.add(offeredProduct);
+                        ProductRow newRow = new ProductRow(productName, productID, productPrice);
+                        productRows.add(newRow);
+                        Warning.setText("s");
+                        Success.setText("Successfully added: " + productName + " to list");
+
+                    }
+                    else if (message.equals("OFFER REJECTED")) {
+                        Warning.setText("Product or product ID already exists");
+                        Success.setText("");
+
+
+                    }
+                }
+                catch (ClassNotFoundException e) {
+                    System.out.println("Class not found: " + e.getMessage());
+                }
+            }
+            catch (NumberFormatException e){
+                Warning.setText("Invalid product price: must be a float (00.00)");
+            }
+
+
+        }
+        else{
+            Warning.setText("Product or product ID already exists");
+            Success.setText("");
         }
 
     }
@@ -228,6 +291,7 @@ public class MainController {
         String productID = ProductID.getText();
         String productName = ProductName.getText();
         String productPrice = ProductPrice.getText();
+        System.out.println(productName);
 
         out.writeObject(productID);
         out.writeObject(productName);
@@ -258,14 +322,17 @@ public class MainController {
                 }
 
                 //success message
-                Success.setText("You bought " + RowRemove.getName() + " for " + RowRemove.getPrice() + " successfully!");
-                Warning.setText("");
+                if(ProductRemove != null) {
+                    Success.setText("You bought " + RowRemove.getName() + " for " + RowRemove.getPrice() + " successfully!");
+                    Warning.setText("");
 
+                }
                 //removes row and product
                 productRows.remove(RowRemove);
                 products.remove(ProductRemove);
                 //adds product to owned product list
-                ProductsController.ownedProducts.add(ProductRemove);
+                ownedProducts.add(ProductRemove);
+                OwnedRows.add(RowRemove);
             }
             else if(message.equals("PURCHASE REJECTED")){
                 //warning message
@@ -278,22 +345,4 @@ public class MainController {
         }
 
     }
-    public void OwnerPage(ActionEvent event) throws IOException {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("products.fxml"));
-            loader.setController(new ProductsController(socket, out, in,scenes));
-            Parent root = loader.load();
-            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            scenes.add(scene);
-            scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        }
-        catch (IOException e){
-            throw new RuntimeException(e);
-        }
-
-    }
-
-
 }

@@ -1,3 +1,4 @@
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,10 +21,11 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 
-public class Controller {
+public class LogInController {
     private final int PORT = 8080;
     private Stage stage;
     private Scene scene;
+    public static Parent root;
     private Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
@@ -61,16 +63,25 @@ public class Controller {
             message = (String) in.readObject();
             if (message.equals("Wrong password or username")) {
                 Warning.setText("Wrong password or username");
+                try{
+                    out.close();
+                    in.close();
+                    socket.close();
+                }
+                catch(IOException e){
+                    System.out.println("IO Error: " + e.getMessage());
+                }
             }
             else if (message.equals("Login successful")) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
-                loader.setController(new MainController(socket, out, in, scenes));
+                loader.setController(new MainController(socket, out, in));
                 Parent root = loader.load();
                 stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 scene = new Scene(root);
                 scenes.add(scene);
                 stage.setScene(scene);
                 stage.show();
+                stage.centerOnScreen();
             }
 
         } catch (ClassNotFoundException e) {
@@ -78,6 +89,13 @@ public class Controller {
 
         }
 
+    }
+    public void exit(){
+        // Close the JavaFX platform
+        Platform.exit();
+
+        // Terminate the JVM
+        System.exit(0);
     }
 }
 

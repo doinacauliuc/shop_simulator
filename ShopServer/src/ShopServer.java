@@ -17,6 +17,7 @@ public class ShopServer{
     private static boolean running;
     public static Map <String, String > users = new HashMap<>();
     public static List<Product> productList = new ArrayList<>();
+    private static final List<ClientHandler> clientList = new ArrayList<>();
 
 
 
@@ -76,13 +77,17 @@ public class ShopServer{
 
                 while(running){
                     Socket clientSocket = serverSocket.accept();
-                    new Thread(new ClientHandler(clientSocket)).start();
+                    ClientHandler clientHandler = new ClientHandler(clientSocket);
+                    new Thread(clientHandler).start();
+                    clientList.add(clientHandler);
+
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
         }
+
     }
 
     public static void main(String[] args){

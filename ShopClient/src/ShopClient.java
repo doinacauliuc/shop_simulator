@@ -11,9 +11,10 @@ public class ShopClient extends Application {
     public void start(Stage stage) throws Exception {
         stage.setTitle("Shop");
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("login.fxml")));
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        stage.centerOnScreen();
     }
     public static void main(String[] args) {
         launch(args);
